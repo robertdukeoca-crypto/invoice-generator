@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoice Generator – WFH Contractor</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: #e0ddd6;
+    --text: #1a1a18;
+    --muted: #6b6b66;
+    --accent: #1a1a18;
+    --radius: 10px;
+    --font: 'DM Sans', system-ui, sans-serif;
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  header {
+    background: var(--accent);
+    color: #fff;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  header h1 { font-size: 15px; font-weight: 500; letter-spacing: .03em; }
+  header span { font-size: 12px; opacity: .55; }
+
+  .container {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 800px) {
+    .container { grid-template-columns: 1fr; padding: 1rem; }
+  }
+
+  /* FORM PANEL */
+  .form-col { display: flex; flex-direction: column; gap: 1rem; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+  }
+
+  .card-title {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  label {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 3px;
+    margin-top: 10px;
+  }
+  label:first-of-type { margin-top: 0; }
+
+  input, textarea {
+    width: 100%;
+    font-family: var(--font);
+    font-size: 13px;
+    background: #fafaf8;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 10px;
+    color: var(--text);
+    transition: border-color .15s;
+  }
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: #fff;
+  }
+  textarea { resize: vertical; min-height: 52px; }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  /* ITEMS TABLE */
+  .tbl { width: 100%; border-collapse: collapse; font-size: 12px; margin: 10px 0 6px; }
+  .tbl th {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--muted);
+    padding: 4px 6px; border-bottom: 1px solid var(--border); text-align: left;
+  }
+  .tbl td { padding: 3px 4px; }
+  .tbl td input {
+    border: 1px solid transparent; background: transparent;
+    font-size: 12px; padding: 4px 6px; border-radius: 4px;
+  }
+  .tbl td input:focus { border-color: var(--border); background: #fafaf8; }
+
+  .add-btn {
+    font-size: 12px; color: var(--muted);
+    background: none; border: 1px dashed var(--border);
+    padding: 5px 12px; border-radius: 6px; cursor: pointer;
+    transition: all .15s;
+  }
+  .add-btn:hover { background: var(--bg); color: var(--text); }
+
+  .del-btn {
+    background: none; border: none; cursor: pointer;
+    color: #ccc; font-size: 16px; line-height: 1; padding: 0 3px;
+    transition: color .15s;
+  }
+  .del-btn:hover { color: #e24b4a; }
+
+  .totals { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
+  .t-row { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; color: var(--muted); }
+  .t-row.grand { font-weight: 600; color: var(--text); font-size: 15px; padding-top: 8px; border-top: 1px solid var(--border); margin-top: 6px; }
+
+  /* ACTION BUTTONS */
+  .actions { display: flex; gap: 8px; margin-top: .5rem; }
+  .btn-dark {
+    background: var(--accent); color: #fff; border: none;
+    padding: 10px 20px; border-radius: 8px; font-size: 13px;
+    font-family: var(--font); font-weight: 500; cursor: pointer;
+    transition: opacity .15s;
+  }
+  .btn-dark:hover { opacity: .85; }
+  .btn-outline {
+    background: none; border: 1px solid var(--border);
+    padding: 10px 20px; border-radius: 8px; font-size: 13px;
+    font-family: var(--font); cursor: pointer; color: var(--text);
+    transition: background .15s;
+  }
+  .btn-outline:hover { background: var(--border); }
+
+  /* PREVIEW */
+  .preview-col { position: sticky; top: 1.5rem; align-self: start; }
+
+  .preview-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+  }
+
+  /* PRINT PREVIEW STYLES */
+  .inv { font-family: 'DM Sans', Arial, sans-serif; font-size: 12px; color: #111; }
+  .inv-header { text-align: center; border-bottom: 2.5px solid #111; padding-bottom: 12px; margin-bottom: 16px; }
+  .inv-header .title { font-size: 22px; font-weight: 700; letter-spacing: .08em; }
+  .inv-header .subtitle { font-size: 13px; font-weight: 600; letter-spacing: .04em; margin-top: 2px; }
+  .inv-top { display: flex; justify-content: space-between; margin-bottom: 16px; }
+  .inv-top .left { line-height: 1.8; }
+  .inv-top .right { text-align: right; line-height: 1.8; }
+  .inv-top .right strong { font-size: 13px; }
+  .inv-billto { margin-bottom: 16px; line-height: 1.8; }
+  .inv-billto .bt-label { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+  .sec-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: #555; margin: 14px 0 6px;
+  }
+  .inv-tbl { width: 100%; border-collapse: collapse; }
+  .inv-tbl th {
+    background: #111; color: #fff; font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .05em;
+    padding: 6px 8px; text-align: left;
+  }
+  .inv-tbl th:not(:first-child), .inv-tbl td:not(:first-child) { text-align: right; }
+  .inv-tbl td { padding: 6px 8px; border-bottom: 1px solid #eee; }
+  .inv-tbl tr:nth-child(even) td { background: #f8f8f6; }
+  .inv-tbl tfoot td {
+    font-weight: 600; border-top: 2px solid #111;
+    background: #f0f0ec; padding: 7px 8px;
+  }
+  .inv-note { font-size: 11px; color: #777; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>&#x1F9FE; Invoice Generator — WFH Contractor</h1>
+  <span>Fill in the form → Print / Save PDF</span>
+</header>
+
+<div class="container">
+
+  <!-- ===== FORM ===== -->
+  <div class="form-col">
+
+    <div class="card">
+      <div class="card-title">Invoice details</div>
+      <div class="row2">
+        <div>
+          <label>Invoice No.</label>
+          <input id="invNum" value="001" oninput="render()">
+        </div>
+        <div>
+          <label>Date</label>
+          <input type="date" id="invDate" oninput="render()">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Your info (From)</div>
+      <label>Full name</label>
+      <input id="fromName" value="Robert Duke C. Oca" oninput="render()">
+      <label>Address</label>
+      <input id="fromAddr" value="Magsaysay St., Miputak, Dipolog City" oninput="render()">
+      <label>Phone</label>
+      <input id="fromPhone" value="09669202495" oninput="render()">
+      <label>Email</label>
+      <input id="fromEmail" value="robertdukeoca@gmail.com" oninput="render()">
+    </div>
+
+    <div class="card">
+      <div class="card-title">Bill to (Client)</div>
+      <label>Company name</label>
+      <input id="toCompany" value="Lease1.com.au Pty. Ltd." oninput="render()">
+      <label>Reference / alias</label>
+      <input id="toRef" value="herein referred to as: Lease1" oninput="render()">
+      <label>ACN / Business ID</label>
+      <input id="toACN" value="ACN: 634 638 001" oninput="render()">
+      <label>Address</label>
+      <input id="toAddr" value="PO Box 61, Red Hill, QLD 4059" oninput="render()">
+      <label>Phone</label>
+      <input id="toPhone" value="Ph 1300 766 369" oninput="render()">
+      <label>Email</label>
+      <input id="toEmail" value="phillipchapman@mail.com" oninput="render()">
+      <label>Website</label>
+      <input id="toWeb" value="www.lease1.com.au" oninput="render()">
+    </div>
+
+    <div class="card">
+      <div class="card-title">Items / Services</div>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th style="width:38%">Description</th>
+            <th style="width:10%">Qty</th>
+            <th style="width:22%">Unit price</th>
+            <th style="width:22%">Total</th>
+            <th style="width:8%"></th>
+          </tr>
+        </thead>
+        <tbody id="itemsBody"></tbody>
+      </table>
+      <button class="add-btn" onclick="addItem()">+ Add item</button>
+      <div class="totals">
+        <div class="t-row"><span>Total receivable</span><span id="subtotalDisp">0.00</span></div>
+        <div class="t-row grand"><span>Balance Due</span><span id="totalDisp">0.00</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Credits / Leave tracker</div>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th style="width:36%">Description</th>
+            <th style="width:18%">Issued</th>
+            <th style="width:18%">Used</th>
+            <th style="width:20%">Remaining</th>
+            <th style="width:8%"></th>
+          </tr>
+        </thead>
+        <tbody id="creditsBody"></tbody>
+      </table>
+      <button class="add-btn" onclick="addCredit()">+ Add row</button>
+      <label style="margin-top:12px">Planned leaves note</label>
+      <input id="plannedLeaves" value="Planned Leaves" oninput="render()">
+    </div>
+
+    <div class="actions">
+      <button class="btn-dark" onclick="printInvoice()">&#x1F5A8; Print / Save as PDF</button>
+      <button class="btn-outline" onclick="resetForm()">Reset form</button>
+    </div>
+
+  </div>
+
+  <!-- ===== PREVIEW ===== -->
+  <div class="preview-col">
+    <div class="preview-wrap">
+      <div class="inv" id="previewPanel">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let items = [
+    { desc: 'May 1-15', qty: 1, price: 25000, total: 12500 },
+    { desc: 'May 16-31', qty: 1, price: 25000, total: 12500 },
+    { desc: 'Annual Bonus (pro rata)', qty: '', price: 16666.66, total: 2083.33 }
+  ];
+  let credits = [
+    { desc: 'Personal time off', issued: 1.67, used: 0, remaining: 1.67 }
+  ];
+
+  function fmt(n) {
+    if (n === '' || n === null || isNaN(+n)) return '';
+    return (+n).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function addItem() { items.push({ desc: '', qty: 1, price: 0, total: 0 }); render(); }
+  function removeItem(i) { items.splice(i, 1); render(); }
+  function addCredit() { credits.push({ desc: '', issued: 0, used: 0, remaining: 0 }); render(); }
+  function removeCredit(i) { credits.splice(i, 1); render(); }
+
+  function resetForm() {
+    if (!confirm('Reset all fields to defaults?')) return;
+    items = [{ desc: '', qty: 1, price: 0, total: 0 }];
+    credits = [{ desc: '', issued: 0, used: 0, remaining: 0 }];
+    document.getElementById('invNum').value = '001';
+    document.getElementById('invDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('plannedLeaves').value = 'Planned Leaves';
+    render();
+  }
+
+  function render() {
+    // Build items rows in form
+    const ib = document.getElementById('itemsBody');
+    ib.innerHTML = '';
+    items.forEach((it, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input value="${it.desc}" oninput="items[${i}].desc=this.value;render()"></td>
+        <td><input value="${it.qty}" oninput="items[${i}].qty=this.value;render()" style="width:38px;text-align:center"></td>
+        <td><input type="number" value="${it.price}" oninput="items[${i}].price=+this.value;items[${i}].total=(+this.value)*(+items[${i}].qty||1);render()"></td>
+        <td><input type="number" value="${it.total}" oninput="items[${i}].total=+this.value;render()"></td>
+        <td><button class="del-btn" onclick="removeItem(${i})" title="Remove">&times;</button></td>`;
+      ib.appendChild(tr);
+    });
+
+    // Credits rows
+    const cb = document.getElementById('creditsBody');
+    cb.innerHTML = '';
+    credits.forEach((c, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input value="${c.desc}" oninput="credits[${i}].desc=this.value;render()"></td>
+        <td><input type="number" step="0.01" value="${c.issued}" oninput="credits[${i}].issued=+this.value;credits[${i}].remaining=(+this.value)-(+credits[${i}].used);render()" style="width:52px"></td>
+        <td><input type="number" step="0.01" value="${c.used}" oninput="credits[${i}].used=+this.value;credits[${i}].remaining=(+credits[${i}].issued)-(+this.value);render()" style="width:52px"></td>
+        <td><input type="number" step="0.01" value="${c.remaining}" readonly style="width:60px;color:#888;background:#f8f8f6"></td>
+        <td><button class="del-btn" onclick="removeCredit(${i})" title="Remove">&times;</button></td>`;
+      cb.appendChild(tr);
+    });
+
+    const subtotal = items.reduce((a, it) => a + (+it.total || 0), 0);
+    document.getElementById('subtotalDisp').textContent = fmt(subtotal);
+    document.getElementById('totalDisp').textContent = fmt(subtotal);
+
+    // Build preview
+    const invNum = document.getElementById('invNum').value || '—';
+    const invDate = document.getElementById('invDate').value || '—';
+    const fromName = document.getElementById('fromName').value;
+    const fromAddr = document.getElementById('fromAddr').value;
+    const fromPhone = document.getElementById('fromPhone').value;
+    const fromEmail = document.getElementById('fromEmail').value;
+    const toCompany = document.getElementById('toCompany').value;
+    const toRef = document.getElementById('toRef').value;
+    const toACN = document.getElementById('toACN').value;
+    const toAddr = document.getElementById('toAddr').value;
+    const toPhone = document.getElementById('toPhone').value;
+    const toEmail = document.getElementById('toEmail').value;
+    const toWeb = document.getElementById('toWeb').value;
+    const leaves = document.getElementById('plannedLeaves').value;
+
+    let itemRows = items.map(it => `
+      <tr>
+        <td>${it.desc || '—'}</td>
+        <td>${it.qty}</td>
+        <td>${fmt(it.price)}</td>
+        <td>${fmt(it.total)}</td>
+      </tr>`).join('');
+
+    let creditRows = credits.map(c => `
+      <tr>
+        <td>${c.desc || '—'}</td>
+        <td>${c.issued}</td>
+        <td>${c.used}</td>
+        <td>${c.remaining}</td>
+      </tr>`).join('');
+
+    document.getElementById('previewPanel').innerHTML = `
+      <div class="inv-header">
+        <div class="title">INVOICE</div>
+        <div class="subtitle">WFH CONTRACTOR</div>
+      </div>
+      <div class="inv-top">
+        <div class="left">
+          <div>${invDate}</div>
+          <div><strong>INVOICE NO. ${invNum}</strong></div>
+        </div>
+        <div class="right">
+          <strong>${fromName}</strong><br>
+          ${fromAddr}<br>
+          ${fromPhone}<br>
+          ${fromEmail}
+        </div>
+      </div>
+      <div class="inv-billto">
+        <div class="bt-label">Bill To</div>
+        <strong>${toCompany}</strong><br>
+        (${toRef})<br>
+        ${toACN}<br>
+        ${toAddr}<br>
+        ${toPhone}<br>
+        E: ${toEmail}<br>
+        W: ${toWeb}
+      </div>
+      <div class="sec-label">Services</div>
+      <table class="inv-tbl">
+        <thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
+        <tbody>${itemRows}</tbody>
+        <tfoot>
+          <tr><td colspan="3" style="text-align:right">Total receivable</td><td>${fmt(subtotal)}</td></tr>
+          <tr><td colspan="3" style="text-align:right;font-weight:700">Balance Due</td><td style="font-weight:700">${fmt(subtotal)}</td></tr>
+        </tfoot>
+      </table>
+      <div class="sec-label">Credits</div>
+      <table class="inv-tbl">
+        <thead><tr><th>Description</th><th>Issued</th><th>Used</th><th>Remaining</th></tr></thead>
+        <tbody>${creditRows}</tbody>
+      </table>
+      <div class="inv-note">${leaves}</div>
+    `;
+  }
+
+  function printInvoice() {
+    const content = document.getElementById('previewPanel').innerHTML;
+    const w = window.open('', '_blank');
+    w.document.write(`<!DOCTYPE html>
+<html><head><title>Invoice – WFH Contractor</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 2.5rem; max-width: 780px; margin: auto; font-size: 12px; color: #111; }
+  .inv-header { text-align: center; border-bottom: 2.5px solid #111; padding-bottom: 12px; margin-bottom: 16px; }
+  .inv-header .title { font-size: 22px; font-weight: 700; letter-spacing: .08em; }
+  .inv-header .subtitle { font-size: 13px; font-weight: 600; letter-spacing: .04em; margin-top: 2px; }
+  .inv-top { display: flex; justify-content: space-between; margin-bottom: 16px; }
+  .inv-top .left, .inv-top .right { line-height: 1.8; }
+  .inv-top .right { text-align: right; }
+  .inv-billto { margin-bottom: 16px; line-height: 1.8; }
+  .inv-billto .bt-label { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+  .sec-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #555; margin: 14px 0 6px; }
+  .inv-tbl { width: 100%; border-collapse: collapse; }
+  .inv-tbl th { background: #111; color: #fff; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; padding: 6px 8px; text-align: left; }
+  .inv-tbl th:not(:first-child), .inv-tbl td:not(:first-child) { text-align: right; }
+  .inv-tbl td { padding: 6px 8px; border-bottom: 1px solid #eee; }
+  .inv-tbl tr:nth-child(even) td { background: #f8f8f6; }
+  .inv-tbl tfoot td { font-weight: 600; border-top: 2px solid #111; background: #f0f0ec; padding: 7px 8px; }
+  .inv-note { font-size: 11px; color: #777; margin-top: 10px; }
+</style>
+</head><body>${content}</body></html>`);
+    w.document.close();
+    w.print();
+  }
+
+  // Init
+  document.getElementById('invDate').value = new Date().toISOString().split('T')[0];
+  render();
+</script>
+</body>
+</html>
