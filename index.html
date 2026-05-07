@@ -115,7 +115,6 @@
         <span>Description</span><span>Qty</span><span>Unit price</span><span>Total</span><span></span>
       </div>
       <div id="itemsContainer"></div>
-      <button class="add-btn" onclick="addItem()">+ Add item</button>
       <div class="totals">
         <div class="t-row"><span>Total receivable</span><span id="subtotalDisp">0.00</span></div>
         <div class="t-row grand"><span>Balance Due</span><span id="totalDisp">0.00</span></div>
@@ -148,12 +147,28 @@
 </div>
 
 <script>
-  let items = [
-    { desc: '', qty: 1, price: 0, total: 0 }
-  ];
-  let credits = [
-    { desc: '', issued: 0, used: 0, remaining: 0 }
-  ];
+  // ── Date helpers ─────────────────────────────────────
+  function getMonthDateRanges() {
+    const raw = document.getElementById('invDate')?.value;
+    if (!raw) return { first: '', second: '' };
+    const date = new Date(raw + 'T00:00:00');
+    const y = date.getFullYear();
+    const m = date.getMonth();
+    const monthName = date.toLocaleString('en-PH', { month: 'long' });
+    const lastDay = new Date(y, m + 1, 0).getDate();
+    return {
+      first:  `${monthName} 1-15`,
+      second: `${monthName} 16-${lastDay}`
+    };
+  }
+
+  // ── Fixed data structure ──────────────────────────────
+  // wage1, wage2 = the two half-month wage rows (price = full wage, total = price/2)
+  // bonus = Annual Bonus row (price and total typed manually)
+  let wage1  = { price: 0, total: 0 };
+  let wage2  = { price: 0, total: 0 };
+  let bonus  = { price: 0, total: 0 };
+  let credits = [{ issued: 0, used: 0, remaining: 0 }];
 
   function fmt(n) {
     if (n === '' || n === null || isNaN(+n)) return '';
@@ -166,51 +181,82 @@
 
   function getVal(id) { return document.getElementById(id)?.value ?? ''; }
 
-  // Build item input rows — only called on add/remove, NOT on typing
+  // ── Build fixed service rows ──────────────────────────
   function buildItemRows() {
+    const ranges = getMonthDateRanges();
     const c = document.getElementById('itemsContainer');
     c.innerHTML = '';
-    items.forEach((it, i) => {
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      row.innerHTML = `
-        <input type="text"   id="id-${i}" value="${esc(it.desc)}"  placeholder="Description">
-        <input type="text"   id="iq-${i}" value="${it.qty}"         style="text-align:center">
-        <input type="number" id="ip-${i}" value="${it.price}"       placeholder="0">
-        <input type="number" id="it-${i}" value="${it.total}"       placeholder="0">
-        <button class="del-btn" onclick="removeItem(${i})">&times;</button>`;
-      c.appendChild(row);
 
-      // Listeners update data + preview only — never rebuild rows
-      document.getElementById(`id-${i}`).addEventListener('input', e => { items[i].desc  = e.target.value; updatePreview(); });
-      document.getElementById(`iq-${i}`).addEventListener('input', e => { items[i].qty   = e.target.value; updatePreview(); });
-      document.getElementById(`ip-${i}`).addEventListener('input', e => {
-        items[i].price = +e.target.value;
-        items[i].total = items[i].price * (parseFloat(items[i].qty) || 1);
-        const t = document.getElementById(`it-${i}`);
-        if (t) t.value = items[i].total;
-        updatePreview();
-      });
-      document.getElementById(`it-${i}`).addEventListener('input', e => { items[i].total = +e.target.value; updatePreview(); });
+    // Row 1 — 1st–15th
+    const r1 = document.createElement('div');
+    r1.className = 'item-row';
+    r1.innerHTML = `
+      <input type="text"   id="desc1" value="${ranges.first}"  readonly style="background:#f0f0ec;color:#555">
+      <input type="text"   id="qty1"  value="1" readonly style="background:#f0f0ec;color:#555;text-align:center">
+      <input type="number" id="price1" value="${wage1.price}" placeholder="Full monthly wage">
+      <input type="number" id="total1" value="${wage1.total}" placeholder="Auto (÷2)" readonly style="background:#f0f0ec;color:#555">
+      <span></span>`;
+    c.appendChild(r1);
+    document.getElementById('price1').addEventListener('input', e => {
+      wage1.price = +e.target.value;
+      wage1.total = +(wage1.price / 2).toFixed(2);
+      document.getElementById('total1').value = wage1.total;
+      updatePreview();
     });
+
+    // Row 2 — 16th–end
+    const r2 = document.createElement('div');
+    r2.className = 'item-row';
+    r2.innerHTML = `
+      <input type="text"   id="desc2" value="${ranges.second}" readonly style="background:#f0f0ec;color:#555">
+      <input type="text"   id="qty2"  value="1" readonly style="background:#f0f0ec;color:#555;text-align:center">
+      <input type="number" id="price2" value="${wage2.price}" placeholder="Full monthly wage">
+      <input type="number" id="total2" value="${wage2.total}" placeholder="Auto (÷2)" readonly style="background:#f0f0ec;color:#555">
+      <span></span>`;
+    c.appendChild(r2);
+    document.getElementById('price2').addEventListener('input', e => {
+      wage2.price = +e.target.value;
+      wage2.total = +(wage2.price / 2).toFixed(2);
+      document.getElementById('total2').value = wage2.total;
+      updatePreview();
+    });
+
+    // Row 3 — Annual Bonus (fixed label, manual price & total)
+    const r3 = document.createElement('div');
+    r3.className = 'item-row';
+    r3.innerHTML = `
+      <input type="text"   id="desc3" value="Annual Bonus (pro rata)" readonly style="background:#f0f0ec;color:#555">
+      <input type="text"   id="qty3"  value="" readonly style="background:#f0f0ec;color:#555;text-align:center">
+      <input type="number" id="price3" value="${bonus.price}" placeholder="Bonus unit price">
+      <input type="number" id="total3" value="${bonus.total}" placeholder="Bonus total">
+      <span></span>`;
+    c.appendChild(r3);
+    document.getElementById('price3').addEventListener('input', e => { bonus.price = +e.target.value; updatePreview(); });
+    document.getElementById('total3').addEventListener('input', e => { bonus.total = +e.target.value; updatePreview(); });
+
     updateTotals();
   }
 
+  // ── Build credit rows ─────────────────────────────────
   function buildCreditRows() {
     const c = document.getElementById('creditsContainer');
     c.innerHTML = '';
     credits.forEach((cr, i) => {
       const row = document.createElement('div');
       row.className = 'credit-row';
+      // First row: fixed "Personal time off" label
+      const descHtml = i === 0
+        ? `<input type="text" id="cd-${i}" value="Personal time off" readonly style="background:#f0f0ec;color:#555">`
+        : `<input type="text" id="cd-${i}" value="${esc(cr.desc)}" placeholder="Description">`;
       row.innerHTML = `
-        <input type="text"   id="cd-${i}" value="${esc(cr.desc)}" placeholder="Description">
+        ${descHtml}
         <input type="number" id="ci-${i}" value="${cr.issued}"    step="0.01">
         <input type="number" id="cu-${i}" value="${cr.used}"      step="0.01">
         <input type="number" id="cr-${i}" value="${cr.remaining}" step="0.01" readonly style="background:#f0f0ec;color:#888">
-        <button class="del-btn" onclick="removeCredit(${i})">&times;</button>`;
+        ${i === 0 ? '<span></span>' : `<button class="del-btn" onclick="removeCredit(${i})">&times;</button>`}`;
       c.appendChild(row);
 
-      document.getElementById(`cd-${i}`).addEventListener('input', e => { credits[i].desc = e.target.value; updatePreview(); });
+      if (i !== 0) document.getElementById(`cd-${i}`).addEventListener('input', e => { credits[i].desc = e.target.value; updatePreview(); });
       document.getElementById(`ci-${i}`).addEventListener('input', e => {
         credits[i].issued = +e.target.value;
         credits[i].remaining = +(credits[i].issued - credits[i].used).toFixed(2);
@@ -226,22 +272,32 @@
     });
   }
 
-  function addItem()      { items.push({desc:'',qty:1,price:0,total:0}); buildItemRows(); updatePreview(); }
-  function removeItem(i)  { items.splice(i,1); buildItemRows(); updatePreview(); }
-  function addCredit()    { credits.push({desc:'',issued:0,used:0,remaining:0}); buildCreditRows(); updatePreview(); }
-  function removeCredit(i){ credits.splice(i,1); buildCreditRows(); updatePreview(); }
+  function addCredit()     { credits.push({desc:'',issued:0,used:0,remaining:0}); buildCreditRows(); updatePreview(); }
+  function removeCredit(i) { if(i===0) return; credits.splice(i,1); buildCreditRows(); updatePreview(); }
 
+  // ── Totals ────────────────────────────────────────────
   function updateTotals() {
-    const sub = items.reduce((a,it) => a+(+it.total||0), 0);
-    document.getElementById('subtotalDisp').textContent = fmt(sub);
-    document.getElementById('totalDisp').textContent    = fmt(sub);
+    const totalReceivable = +(wage1.price / 2).toFixed(2);
+    const balanceDue      = bonus.price - bonus.total;
+    document.getElementById('subtotalDisp').textContent = fmt(totalReceivable);
+    document.getElementById('totalDisp').textContent    = fmt(balanceDue);
   }
 
+  // ── Preview ───────────────────────────────────────────
   function updatePreview() {
     updateTotals();
-    const sub = items.reduce((a,it) => a+(+it.total||0), 0);
-    const itemRows   = items.map(it   => `<tr><td>${esc(it.desc)||'—'}</td><td>${it.qty}</td><td>${fmt(it.price)}</td><td>${fmt(it.total)}</td></tr>`).join('');
-    const creditRows = credits.map(cr => `<tr><td>${esc(cr.desc)||'—'}</td><td>${cr.issued}</td><td>${cr.used}</td><td>${cr.remaining}</td></tr>`).join('');
+    const ranges          = getMonthDateRanges();
+    const totalReceivable = +(wage1.price / 2).toFixed(2);
+    const balanceDue      = bonus.price - bonus.total;
+
+    const itemRows = `
+      <tr><td>${ranges.first}</td><td>1</td><td>${fmt(wage1.price)}</td><td>${fmt(wage1.total)}</td></tr>
+      <tr><td>${ranges.second}</td><td>1</td><td>${fmt(wage2.price)}</td><td>${fmt(wage2.total)}</td></tr>
+      <tr><td>Annual Bonus (pro rata)</td><td></td><td>${fmt(bonus.price)}</td><td>${fmt(bonus.total)}</td></tr>`;
+
+    const creditRows = credits.map(cr => `
+      <tr><td>Personal time off</td><td>${cr.issued}</td><td>${cr.used}</td><td>${cr.remaining}</td></tr>`).join('');
+
     document.getElementById('previewPanel').innerHTML = `
       <div class="inv-header"><div class="title">INVOICE</div><div class="subtitle">WFH CONTRACTOR</div></div>
       <div class="inv-top">
@@ -257,8 +313,8 @@
         <thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
         <tbody>${itemRows}</tbody>
         <tfoot>
-          <tr><td colspan="3" style="text-align:right">Total receivable</td><td>${fmt(sub)}</td></tr>
-          <tr><td colspan="3" style="text-align:right;font-weight:700">Balance Due</td><td style="font-weight:700">${fmt(sub)}</td></tr>
+          <tr><td colspan="3" style="text-align:right">Total receivable</td><td>${fmt(totalReceivable)}</td></tr>
+          <tr><td colspan="3" style="text-align:right;font-weight:700">Balance Due</td><td style="font-weight:700">${fmt(balanceDue)}</td></tr>
         </tfoot>
       </table>
       <div class="sec-label">Credits</div>
@@ -278,19 +334,30 @@
   }
 
   function resetForm() {
-    if (!confirm('Reset all fields to defaults?')) return;
-    items   = [{desc:'',qty:1,price:0,total:0}];
-    credits = [{desc:'',issued:0,used:0,remaining:0}];
-    document.getElementById('invNum').value        = '001';
-    document.getElementById('invDate').value       = new Date().toISOString().split('T')[0];
-    document.getElementById('plannedLeaves').value = 'Planned Leaves';
+    if (!confirm('Reset all fields?')) return;
+    wage1  = { price: 0, total: 0 };
+    wage2  = { price: 0, total: 0 };
+    bonus  = { price: 0, total: 0 };
+    credits = [{ issued: 0, used: 0, remaining: 0 }];
+    document.getElementById('invNum').value        = '';
+    document.getElementById('invDate').value       = '';
+    document.getElementById('plannedLeaves').value = '';
     buildItemRows(); buildCreditRows(); updatePreview();
   }
 
   // Static fields — just update preview on input, no row rebuilding
   ['invNum','invDate','fromName','fromAddr','fromPhone','fromEmail',
    'toCompany','toRef','toACN','toAddr','toPhone','toEmail','toWeb','plannedLeaves']
-  .forEach(id => document.getElementById(id)?.addEventListener('input', updatePreview));
+  .forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    // Date field also rebuilds item rows to refresh month descriptions
+    if (id === 'invDate') {
+      el.addEventListener('input', () => { buildItemRows(); updatePreview(); });
+    } else {
+      el.addEventListener('input', updatePreview);
+    }
+  });
 
   // Init
   buildItemRows();
