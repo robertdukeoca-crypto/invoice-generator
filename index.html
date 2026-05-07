@@ -92,10 +92,10 @@
 
     <div class="card">
       <div class="card-title">Your info (From)</div>
-      <label>Full name</label><input type="text" id="fromName" value="Robert Duke C. Oca">
-      <label>Address</label><input type="text" id="fromAddr" value="Magsaysay St., Miputak, Dipolog City">
-      <label>Phone</label><input type="text" id="fromPhone" value="09669202495">
-      <label>Email</label><input type="email" id="fromEmail" value="robertdukeoca@gmail.com">
+      <label>Full name</label><input type="text" id="fromName" value="">
+      <label>Address</label><input type="text" id="fromAddr" value="">
+      <label>Phone</label><input type="text" id="fromPhone" value="">
+      <label>Email</label><input type="email" id="fromEmail" value="">
     </div>
 
     <div class="card">
@@ -130,7 +130,7 @@
       <div id="creditsContainer"></div>
       <button class="add-btn" onclick="addCredit()">+ Add row</button>
       <label style="margin-top:12px">Planned leaves note</label>
-      <input type="text" id="plannedLeaves" value="Planned Leaves">
+      <input type="text" id="plannedLeaves" value="" placeholder="e.g. Planned Leaves">
     </div>
 
     <div class="actions">
@@ -149,12 +149,10 @@
 
 <script>
   let items = [
-    { desc: 'May 1-15', qty: 1, price: 25000, total: 12500 },
-    { desc: 'May 16-31', qty: 1, price: 25000, total: 12500 },
-    { desc: 'Annual Bonus (pro rata)', qty: '', price: 16666.66, total: 2083.33 }
+    { desc: '', qty: 1, price: 0, total: 0 }
   ];
   let credits = [
-    { desc: 'Personal time off', issued: 1.67, used: 0, remaining: 1.67 }
+    { desc: '', issued: 0, used: 0, remaining: 0 }
   ];
 
   function fmt(n) {
@@ -295,7 +293,6 @@
   .forEach(id => document.getElementById(id)?.addEventListener('input', updatePreview));
 
   // Init
-  document.getElementById('invDate').value = new Date().toISOString().split('T')[0];
   buildItemRows();
   buildCreditRows();
   updatePreview();
