@@ -6,262 +6,115 @@
 <title>Invoice Generator – WFH Contractor</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --bg: #f5f4f0;
-    --surface: #ffffff;
-    --border: #e0ddd6;
-    --text: #1a1a18;
-    --muted: #6b6b66;
-    --accent: #1a1a18;
+    --bg: #f5f4f0; --surface: #ffffff; --border: #e0ddd6;
+    --text: #1a1a18; --muted: #6b6b66; --accent: #1a1a18;
     --radius: 10px;
-    --font: 'DM Sans', system-ui, sans-serif;
   }
-
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
-
-  body {
-    font-family: var(--font);
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 14px;
-  }
-
-  header {
-    background: var(--accent);
-    color: #fff;
-    padding: 1rem 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
+  body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+  header { background: var(--accent); color: #fff; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
   header h1 { font-size: 15px; font-weight: 500; letter-spacing: .03em; }
   header span { font-size: 12px; opacity: .55; }
-
-  .container {
-    display: grid;
-    grid-template-columns: 380px 1fr;
-    gap: 1.5rem;
-    padding: 1.5rem 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
-  @media (max-width: 800px) {
-    .container { grid-template-columns: 1fr; padding: 1rem; }
-  }
-
-  /* FORM PANEL */
+  .container { display: grid; grid-template-columns: 400px 1fr; gap: 1.5rem; padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto; }
+  @media (max-width: 820px) { .container { grid-template-columns: 1fr; padding: 1rem; } }
   .form-col { display: flex; flex-direction: column; gap: 1rem; }
-
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.25rem;
-  }
-
-  .card-title {
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .1em;
-    color: var(--muted);
-    margin-bottom: 1rem;
-  }
-
-  label {
-    display: block;
-    font-size: 11px;
-    color: var(--muted);
-    margin-bottom: 3px;
-    margin-top: 10px;
-  }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
+  .card-title { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 1rem; }
+  label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 3px; margin-top: 10px; }
   label:first-of-type { margin-top: 0; }
-
-  input, textarea {
-    width: 100%;
-    font-family: var(--font);
-    font-size: 13px;
-    background: #fafaf8;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 7px 10px;
-    color: var(--text);
+  input[type=text], input[type=date], input[type=email], input[type=number], textarea {
+    width: 100%; font-family: inherit; font-size: 13px;
+    background: #fafaf8; border: 1px solid var(--border);
+    border-radius: 6px; padding: 7px 10px; color: var(--text);
     transition: border-color .15s;
   }
-  input:focus, textarea:focus {
-    outline: none;
-    border-color: var(--accent);
-    background: #fff;
-  }
+  input:focus, textarea:focus { outline: none; border-color: #888; background: #fff; }
   textarea { resize: vertical; min-height: 52px; }
-
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-
-  /* ITEMS TABLE */
-  .tbl { width: 100%; border-collapse: collapse; font-size: 12px; margin: 10px 0 6px; }
-  .tbl th {
-    font-size: 10px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: .06em; color: var(--muted);
-    padding: 4px 6px; border-bottom: 1px solid var(--border); text-align: left;
-  }
-  .tbl td { padding: 3px 4px; }
-  .tbl td input {
-    border: 1px solid transparent; background: transparent;
-    font-size: 12px; padding: 4px 6px; border-radius: 4px;
-  }
-  .tbl td input:focus { border-color: var(--border); background: #fafaf8; }
-
-  .add-btn {
-    font-size: 12px; color: var(--muted);
-    background: none; border: 1px dashed var(--border);
-    padding: 5px 12px; border-radius: 6px; cursor: pointer;
-    transition: all .15s;
-  }
+  .item-row { display: grid; grid-template-columns: 1fr 52px 90px 90px 30px; gap: 4px; align-items: center; margin-bottom: 4px; }
+  .item-row input { padding: 5px 7px; font-size: 12px; }
+  .item-header { display: grid; grid-template-columns: 1fr 52px 90px 90px 30px; gap: 4px; margin-bottom: 4px; }
+  .item-header span { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); padding: 0 2px; }
+  .credit-row { display: grid; grid-template-columns: 1fr 65px 65px 65px 30px; gap: 4px; align-items: center; margin-bottom: 4px; }
+  .credit-row input { padding: 5px 7px; font-size: 12px; }
+  .credit-header { display: grid; grid-template-columns: 1fr 65px 65px 65px 30px; gap: 4px; margin-bottom: 4px; }
+  .credit-header span { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); padding: 0 2px; }
+  .add-btn { font-size: 12px; color: var(--muted); background: none; border: 1px dashed var(--border); padding: 5px 12px; border-radius: 6px; cursor: pointer; margin-top: 6px; }
   .add-btn:hover { background: var(--bg); color: var(--text); }
-
-  .del-btn {
-    background: none; border: none; cursor: pointer;
-    color: #ccc; font-size: 16px; line-height: 1; padding: 0 3px;
-    transition: color .15s;
-  }
+  .del-btn { background: none; border: none; cursor: pointer; color: #ccc; font-size: 18px; line-height: 1; padding: 0; width: 26px; text-align: center; }
   .del-btn:hover { color: #e24b4a; }
-
   .totals { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
   .t-row { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; color: var(--muted); }
   .t-row.grand { font-weight: 600; color: var(--text); font-size: 15px; padding-top: 8px; border-top: 1px solid var(--border); margin-top: 6px; }
-
-  /* ACTION BUTTONS */
-  .actions { display: flex; gap: 8px; margin-top: .5rem; }
-  .btn-dark {
-    background: var(--accent); color: #fff; border: none;
-    padding: 10px 20px; border-radius: 8px; font-size: 13px;
-    font-family: var(--font); font-weight: 500; cursor: pointer;
-    transition: opacity .15s;
-  }
+  .actions { display: flex; gap: 8px; margin-top: .5rem; flex-wrap: wrap; }
+  .btn-dark { background: var(--accent); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-family: inherit; font-weight: 500; cursor: pointer; }
   .btn-dark:hover { opacity: .85; }
-  .btn-outline {
-    background: none; border: 1px solid var(--border);
-    padding: 10px 20px; border-radius: 8px; font-size: 13px;
-    font-family: var(--font); cursor: pointer; color: var(--text);
-    transition: background .15s;
-  }
+  .btn-outline { background: none; border: 1px solid var(--border); padding: 10px 20px; border-radius: 8px; font-size: 13px; font-family: inherit; cursor: pointer; color: var(--text); }
   .btn-outline:hover { background: var(--border); }
-
-  /* PREVIEW */
   .preview-col { position: sticky; top: 1.5rem; align-self: start; }
-
-  .preview-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 2rem;
-  }
-
-  /* PRINT PREVIEW STYLES */
-  .inv { font-family: 'DM Sans', Arial, sans-serif; font-size: 12px; color: #111; }
+  .preview-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; }
+  .inv { font-family: Arial, sans-serif; font-size: 12px; color: #111; }
   .inv-header { text-align: center; border-bottom: 2.5px solid #111; padding-bottom: 12px; margin-bottom: 16px; }
   .inv-header .title { font-size: 22px; font-weight: 700; letter-spacing: .08em; }
-  .inv-header .subtitle { font-size: 13px; font-weight: 600; letter-spacing: .04em; margin-top: 2px; }
-  .inv-top { display: flex; justify-content: space-between; margin-bottom: 16px; }
-  .inv-top .left { line-height: 1.8; }
-  .inv-top .right { text-align: right; line-height: 1.8; }
-  .inv-top .right strong { font-size: 13px; }
+  .inv-header .subtitle { font-size: 13px; font-weight: 600; margin-top: 2px; }
+  .inv-top { display: flex; justify-content: space-between; margin-bottom: 16px; line-height: 1.8; }
+  .inv-top .right { text-align: right; }
   .inv-billto { margin-bottom: 16px; line-height: 1.8; }
   .inv-billto .bt-label { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
-  .sec-label {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .08em; color: #555; margin: 14px 0 6px;
-  }
+  .sec-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #555; margin: 14px 0 6px; }
   .inv-tbl { width: 100%; border-collapse: collapse; }
-  .inv-tbl th {
-    background: #111; color: #fff; font-size: 10px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: .05em;
-    padding: 6px 8px; text-align: left;
-  }
+  .inv-tbl th { background: #111; color: #fff; font-size: 10px; font-weight: 600; text-transform: uppercase; padding: 6px 8px; text-align: left; }
   .inv-tbl th:not(:first-child), .inv-tbl td:not(:first-child) { text-align: right; }
   .inv-tbl td { padding: 6px 8px; border-bottom: 1px solid #eee; }
   .inv-tbl tr:nth-child(even) td { background: #f8f8f6; }
-  .inv-tbl tfoot td {
-    font-weight: 600; border-top: 2px solid #111;
-    background: #f0f0ec; padding: 7px 8px;
-  }
+  .inv-tbl tfoot td { font-weight: 600; border-top: 2px solid #111; background: #f0f0ec; padding: 7px 8px; }
   .inv-note { font-size: 11px; color: #777; margin-top: 10px; }
 </style>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <header>
-  <h1>&#x1F9FE; Invoice Generator — WFH Contractor</h1>
+  <h1>🧾 Invoice Generator — WFH Contractor</h1>
   <span>Fill in the form → Print / Save PDF</span>
 </header>
 
 <div class="container">
-
-  <!-- ===== FORM ===== -->
   <div class="form-col">
 
     <div class="card">
       <div class="card-title">Invoice details</div>
       <div class="row2">
-        <div>
-          <label>Invoice No.</label>
-          <input id="invNum" value="001" oninput="render()">
-        </div>
-        <div>
-          <label>Date</label>
-          <input type="date" id="invDate" oninput="render()">
-        </div>
+        <div><label>Invoice No.</label><input type="text" id="invNum" value="001"></div>
+        <div><label>Date</label><input type="date" id="invDate"></div>
       </div>
     </div>
 
     <div class="card">
       <div class="card-title">Your info (From)</div>
-      <label>Full name</label>
-      <input id="fromName" value="Robert Duke C. Oca" oninput="render()">
-      <label>Address</label>
-      <input id="fromAddr" value="Magsaysay St., Miputak, Dipolog City" oninput="render()">
-      <label>Phone</label>
-      <input id="fromPhone" value="09669202495" oninput="render()">
-      <label>Email</label>
-      <input id="fromEmail" value="robertdukeoca@gmail.com" oninput="render()">
+      <label>Full name</label><input type="text" id="fromName" value="Robert Duke C. Oca">
+      <label>Address</label><input type="text" id="fromAddr" value="Magsaysay St., Miputak, Dipolog City">
+      <label>Phone</label><input type="text" id="fromPhone" value="09669202495">
+      <label>Email</label><input type="email" id="fromEmail" value="robertdukeoca@gmail.com">
     </div>
 
     <div class="card">
       <div class="card-title">Bill to (Client)</div>
-      <label>Company name</label>
-      <input id="toCompany" value="Lease1.com.au Pty. Ltd." oninput="render()">
-      <label>Reference / alias</label>
-      <input id="toRef" value="herein referred to as: Lease1" oninput="render()">
-      <label>ACN / Business ID</label>
-      <input id="toACN" value="ACN: 634 638 001" oninput="render()">
-      <label>Address</label>
-      <input id="toAddr" value="PO Box 61, Red Hill, QLD 4059" oninput="render()">
-      <label>Phone</label>
-      <input id="toPhone" value="Ph 1300 766 369" oninput="render()">
-      <label>Email</label>
-      <input id="toEmail" value="phillipchapman@mail.com" oninput="render()">
-      <label>Website</label>
-      <input id="toWeb" value="www.lease1.com.au" oninput="render()">
+      <label>Company name</label><input type="text" id="toCompany" value="Lease1.com.au Pty. Ltd.">
+      <label>Reference / alias</label><input type="text" id="toRef" value="herein referred to as: Lease1">
+      <label>ACN / Business ID</label><input type="text" id="toACN" value="ACN: 634 638 001">
+      <label>Address</label><input type="text" id="toAddr" value="PO Box 61, Red Hill, QLD 4059">
+      <label>Phone</label><input type="text" id="toPhone" value="Ph 1300 766 369">
+      <label>Email</label><input type="email" id="toEmail" value="phillipchapman@mail.com">
+      <label>Website</label><input type="text" id="toWeb" value="www.lease1.com.au">
     </div>
 
     <div class="card">
       <div class="card-title">Items / Services</div>
-      <table class="tbl">
-        <thead>
-          <tr>
-            <th style="width:38%">Description</th>
-            <th style="width:10%">Qty</th>
-            <th style="width:22%">Unit price</th>
-            <th style="width:22%">Total</th>
-            <th style="width:8%"></th>
-          </tr>
-        </thead>
-        <tbody id="itemsBody"></tbody>
-      </table>
+      <div class="item-header">
+        <span>Description</span><span>Qty</span><span>Unit price</span><span>Total</span><span></span>
+      </div>
+      <div id="itemsContainer"></div>
       <button class="add-btn" onclick="addItem()">+ Add item</button>
       <div class="totals">
         <div class="t-row"><span>Total receivable</span><span id="subtotalDisp">0.00</span></div>
@@ -271,39 +124,27 @@
 
     <div class="card">
       <div class="card-title">Credits / Leave tracker</div>
-      <table class="tbl">
-        <thead>
-          <tr>
-            <th style="width:36%">Description</th>
-            <th style="width:18%">Issued</th>
-            <th style="width:18%">Used</th>
-            <th style="width:20%">Remaining</th>
-            <th style="width:8%"></th>
-          </tr>
-        </thead>
-        <tbody id="creditsBody"></tbody>
-      </table>
+      <div class="credit-header">
+        <span>Description</span><span>Issued</span><span>Used</span><span>Remaining</span><span></span>
+      </div>
+      <div id="creditsContainer"></div>
       <button class="add-btn" onclick="addCredit()">+ Add row</button>
       <label style="margin-top:12px">Planned leaves note</label>
-      <input id="plannedLeaves" value="Planned Leaves" oninput="render()">
+      <input type="text" id="plannedLeaves" value="Planned Leaves">
     </div>
 
     <div class="actions">
-      <button class="btn-dark" onclick="printInvoice()">&#x1F5A8; Print / Save as PDF</button>
-      <button class="btn-outline" onclick="resetForm()">Reset form</button>
+      <button class="btn-dark" onclick="printInvoice()">🖨 Print / Save as PDF</button>
+      <button class="btn-outline" onclick="resetForm()">Reset</button>
     </div>
 
   </div>
 
-  <!-- ===== PREVIEW ===== -->
   <div class="preview-col">
     <div class="preview-wrap">
-      <div class="inv" id="previewPanel">
-        <!-- rendered by JS -->
-      </div>
+      <div class="inv" id="previewPanel"></div>
     </div>
   </div>
-
 </div>
 
 <script>
@@ -321,120 +162,105 @@
     return (+n).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  function addItem() { items.push({ desc: '', qty: 1, price: 0, total: 0 }); render(); }
-  function removeItem(i) { items.splice(i, 1); render(); }
-  function addCredit() { credits.push({ desc: '', issued: 0, used: 0, remaining: 0 }); render(); }
-  function removeCredit(i) { credits.splice(i, 1); render(); }
-
-  function resetForm() {
-    if (!confirm('Reset all fields to defaults?')) return;
-    items = [{ desc: '', qty: 1, price: 0, total: 0 }];
-    credits = [{ desc: '', issued: 0, used: 0, remaining: 0 }];
-    document.getElementById('invNum').value = '001';
-    document.getElementById('invDate').value = new Date().toISOString().split('T')[0];
-    document.getElementById('plannedLeaves').value = 'Planned Leaves';
-    render();
+  function esc(str) {
+    return String(str ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  function render() {
-    // Build items rows in form
-    const ib = document.getElementById('itemsBody');
-    ib.innerHTML = '';
+  function getVal(id) { return document.getElementById(id)?.value ?? ''; }
+
+  // Build item input rows — only called on add/remove, NOT on typing
+  function buildItemRows() {
+    const c = document.getElementById('itemsContainer');
+    c.innerHTML = '';
     items.forEach((it, i) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><input value="${it.desc}" oninput="items[${i}].desc=this.value;render()"></td>
-        <td><input value="${it.qty}" oninput="items[${i}].qty=this.value;render()" style="width:38px;text-align:center"></td>
-        <td><input type="number" value="${it.price}" oninput="items[${i}].price=+this.value;items[${i}].total=(+this.value)*(+items[${i}].qty||1);render()"></td>
-        <td><input type="number" value="${it.total}" oninput="items[${i}].total=+this.value;render()"></td>
-        <td><button class="del-btn" onclick="removeItem(${i})" title="Remove">&times;</button></td>`;
-      ib.appendChild(tr);
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <input type="text"   id="id-${i}" value="${esc(it.desc)}"  placeholder="Description">
+        <input type="text"   id="iq-${i}" value="${it.qty}"         style="text-align:center">
+        <input type="number" id="ip-${i}" value="${it.price}"       placeholder="0">
+        <input type="number" id="it-${i}" value="${it.total}"       placeholder="0">
+        <button class="del-btn" onclick="removeItem(${i})">&times;</button>`;
+      c.appendChild(row);
+
+      // Listeners update data + preview only — never rebuild rows
+      document.getElementById(`id-${i}`).addEventListener('input', e => { items[i].desc  = e.target.value; updatePreview(); });
+      document.getElementById(`iq-${i}`).addEventListener('input', e => { items[i].qty   = e.target.value; updatePreview(); });
+      document.getElementById(`ip-${i}`).addEventListener('input', e => {
+        items[i].price = +e.target.value;
+        items[i].total = items[i].price * (parseFloat(items[i].qty) || 1);
+        const t = document.getElementById(`it-${i}`);
+        if (t) t.value = items[i].total;
+        updatePreview();
+      });
+      document.getElementById(`it-${i}`).addEventListener('input', e => { items[i].total = +e.target.value; updatePreview(); });
     });
+    updateTotals();
+  }
 
-    // Credits rows
-    const cb = document.getElementById('creditsBody');
-    cb.innerHTML = '';
-    credits.forEach((c, i) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><input value="${c.desc}" oninput="credits[${i}].desc=this.value;render()"></td>
-        <td><input type="number" step="0.01" value="${c.issued}" oninput="credits[${i}].issued=+this.value;credits[${i}].remaining=(+this.value)-(+credits[${i}].used);render()" style="width:52px"></td>
-        <td><input type="number" step="0.01" value="${c.used}" oninput="credits[${i}].used=+this.value;credits[${i}].remaining=(+credits[${i}].issued)-(+this.value);render()" style="width:52px"></td>
-        <td><input type="number" step="0.01" value="${c.remaining}" readonly style="width:60px;color:#888;background:#f8f8f6"></td>
-        <td><button class="del-btn" onclick="removeCredit(${i})" title="Remove">&times;</button></td>`;
-      cb.appendChild(tr);
+  function buildCreditRows() {
+    const c = document.getElementById('creditsContainer');
+    c.innerHTML = '';
+    credits.forEach((cr, i) => {
+      const row = document.createElement('div');
+      row.className = 'credit-row';
+      row.innerHTML = `
+        <input type="text"   id="cd-${i}" value="${esc(cr.desc)}" placeholder="Description">
+        <input type="number" id="ci-${i}" value="${cr.issued}"    step="0.01">
+        <input type="number" id="cu-${i}" value="${cr.used}"      step="0.01">
+        <input type="number" id="cr-${i}" value="${cr.remaining}" step="0.01" readonly style="background:#f0f0ec;color:#888">
+        <button class="del-btn" onclick="removeCredit(${i})">&times;</button>`;
+      c.appendChild(row);
+
+      document.getElementById(`cd-${i}`).addEventListener('input', e => { credits[i].desc = e.target.value; updatePreview(); });
+      document.getElementById(`ci-${i}`).addEventListener('input', e => {
+        credits[i].issued = +e.target.value;
+        credits[i].remaining = +(credits[i].issued - credits[i].used).toFixed(2);
+        const r = document.getElementById(`cr-${i}`); if (r) r.value = credits[i].remaining;
+        updatePreview();
+      });
+      document.getElementById(`cu-${i}`).addEventListener('input', e => {
+        credits[i].used = +e.target.value;
+        credits[i].remaining = +(credits[i].issued - credits[i].used).toFixed(2);
+        const r = document.getElementById(`cr-${i}`); if (r) r.value = credits[i].remaining;
+        updatePreview();
+      });
     });
+  }
 
-    const subtotal = items.reduce((a, it) => a + (+it.total || 0), 0);
-    document.getElementById('subtotalDisp').textContent = fmt(subtotal);
-    document.getElementById('totalDisp').textContent = fmt(subtotal);
+  function addItem()      { items.push({desc:'',qty:1,price:0,total:0}); buildItemRows(); updatePreview(); }
+  function removeItem(i)  { items.splice(i,1); buildItemRows(); updatePreview(); }
+  function addCredit()    { credits.push({desc:'',issued:0,used:0,remaining:0}); buildCreditRows(); updatePreview(); }
+  function removeCredit(i){ credits.splice(i,1); buildCreditRows(); updatePreview(); }
 
-    // Build preview
-    const invNum = document.getElementById('invNum').value || '—';
-    const invDate = document.getElementById('invDate').value || '—';
-    const fromName = document.getElementById('fromName').value;
-    const fromAddr = document.getElementById('fromAddr').value;
-    const fromPhone = document.getElementById('fromPhone').value;
-    const fromEmail = document.getElementById('fromEmail').value;
-    const toCompany = document.getElementById('toCompany').value;
-    const toRef = document.getElementById('toRef').value;
-    const toACN = document.getElementById('toACN').value;
-    const toAddr = document.getElementById('toAddr').value;
-    const toPhone = document.getElementById('toPhone').value;
-    const toEmail = document.getElementById('toEmail').value;
-    const toWeb = document.getElementById('toWeb').value;
-    const leaves = document.getElementById('plannedLeaves').value;
+  function updateTotals() {
+    const sub = items.reduce((a,it) => a+(+it.total||0), 0);
+    document.getElementById('subtotalDisp').textContent = fmt(sub);
+    document.getElementById('totalDisp').textContent    = fmt(sub);
+  }
 
-    let itemRows = items.map(it => `
-      <tr>
-        <td>${it.desc || '—'}</td>
-        <td>${it.qty}</td>
-        <td>${fmt(it.price)}</td>
-        <td>${fmt(it.total)}</td>
-      </tr>`).join('');
-
-    let creditRows = credits.map(c => `
-      <tr>
-        <td>${c.desc || '—'}</td>
-        <td>${c.issued}</td>
-        <td>${c.used}</td>
-        <td>${c.remaining}</td>
-      </tr>`).join('');
-
+  function updatePreview() {
+    updateTotals();
+    const sub = items.reduce((a,it) => a+(+it.total||0), 0);
+    const itemRows   = items.map(it   => `<tr><td>${esc(it.desc)||'—'}</td><td>${it.qty}</td><td>${fmt(it.price)}</td><td>${fmt(it.total)}</td></tr>`).join('');
+    const creditRows = credits.map(cr => `<tr><td>${esc(cr.desc)||'—'}</td><td>${cr.issued}</td><td>${cr.used}</td><td>${cr.remaining}</td></tr>`).join('');
     document.getElementById('previewPanel').innerHTML = `
-      <div class="inv-header">
-        <div class="title">INVOICE</div>
-        <div class="subtitle">WFH CONTRACTOR</div>
-      </div>
+      <div class="inv-header"><div class="title">INVOICE</div><div class="subtitle">WFH CONTRACTOR</div></div>
       <div class="inv-top">
-        <div class="left">
-          <div>${invDate}</div>
-          <div><strong>INVOICE NO. ${invNum}</strong></div>
-        </div>
-        <div class="right">
-          <strong>${fromName}</strong><br>
-          ${fromAddr}<br>
-          ${fromPhone}<br>
-          ${fromEmail}
-        </div>
+        <div class="left"><strong>${esc(getVal('fromName'))}</strong><br>${esc(getVal('fromAddr'))}<br>${esc(getVal('fromPhone'))}<br>${esc(getVal('fromEmail'))}</div>
+        <div class="right"><div>${esc(getVal('invDate'))||'—'}</div><div><strong>INVOICE NO. ${esc(getVal('invNum'))}</strong></div></div>
       </div>
       <div class="inv-billto">
         <div class="bt-label">Bill To</div>
-        <strong>${toCompany}</strong><br>
-        (${toRef})<br>
-        ${toACN}<br>
-        ${toAddr}<br>
-        ${toPhone}<br>
-        E: ${toEmail}<br>
-        W: ${toWeb}
+        <strong>${esc(getVal('toCompany'))}</strong><br>(${esc(getVal('toRef'))})<br>${esc(getVal('toACN'))}<br>${esc(getVal('toAddr'))}<br>${esc(getVal('toPhone'))}<br>E: ${esc(getVal('toEmail'))}<br>W: ${esc(getVal('toWeb'))}
       </div>
       <div class="sec-label">Services</div>
       <table class="inv-tbl">
         <thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
         <tbody>${itemRows}</tbody>
         <tfoot>
-          <tr><td colspan="3" style="text-align:right">Total receivable</td><td>${fmt(subtotal)}</td></tr>
-          <tr><td colspan="3" style="text-align:right;font-weight:700">Balance Due</td><td style="font-weight:700">${fmt(subtotal)}</td></tr>
+          <tr><td colspan="3" style="text-align:right">Total receivable</td><td>${fmt(sub)}</td></tr>
+          <tr><td colspan="3" style="text-align:right;font-weight:700">Balance Due</td><td style="font-weight:700">${fmt(sub)}</td></tr>
         </tfoot>
       </table>
       <div class="sec-label">Credits</div>
@@ -442,42 +268,37 @@
         <thead><tr><th>Description</th><th>Issued</th><th>Used</th><th>Remaining</th></tr></thead>
         <tbody>${creditRows}</tbody>
       </table>
-      <div class="inv-note">${leaves}</div>
-    `;
+      <div class="inv-note">${esc(getVal('plannedLeaves'))}</div>`;
   }
 
   function printInvoice() {
+    updatePreview();
     const content = document.getElementById('previewPanel').innerHTML;
-    const w = window.open('', '_blank');
-    w.document.write(`<!DOCTYPE html>
-<html><head><title>Invoice – WFH Contractor</title>
-<style>
-  body { font-family: Arial, sans-serif; padding: 2.5rem; max-width: 780px; margin: auto; font-size: 12px; color: #111; }
-  .inv-header { text-align: center; border-bottom: 2.5px solid #111; padding-bottom: 12px; margin-bottom: 16px; }
-  .inv-header .title { font-size: 22px; font-weight: 700; letter-spacing: .08em; }
-  .inv-header .subtitle { font-size: 13px; font-weight: 600; letter-spacing: .04em; margin-top: 2px; }
-  .inv-top { display: flex; justify-content: space-between; margin-bottom: 16px; }
-  .inv-top .left, .inv-top .right { line-height: 1.8; }
-  .inv-top .right { text-align: right; }
-  .inv-billto { margin-bottom: 16px; line-height: 1.8; }
-  .inv-billto .bt-label { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
-  .sec-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #555; margin: 14px 0 6px; }
-  .inv-tbl { width: 100%; border-collapse: collapse; }
-  .inv-tbl th { background: #111; color: #fff; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; padding: 6px 8px; text-align: left; }
-  .inv-tbl th:not(:first-child), .inv-tbl td:not(:first-child) { text-align: right; }
-  .inv-tbl td { padding: 6px 8px; border-bottom: 1px solid #eee; }
-  .inv-tbl tr:nth-child(even) td { background: #f8f8f6; }
-  .inv-tbl tfoot td { font-weight: 600; border-top: 2px solid #111; background: #f0f0ec; padding: 7px 8px; }
-  .inv-note { font-size: 11px; color: #777; margin-top: 10px; }
-</style>
-</head><body>${content}</body></html>`);
-    w.document.close();
-    w.print();
+    const w = window.open('','_blank');
+    w.document.write(`<!DOCTYPE html><html><head><title>Invoice – WFH Contractor</title><style>body{font-family:Arial,sans-serif;padding:2.5rem;max-width:780px;margin:auto;font-size:12px;color:#111}.inv-header{text-align:center;border-bottom:2.5px solid #111;padding-bottom:12px;margin-bottom:16px}.title{font-size:22px;font-weight:700;letter-spacing:.08em}.subtitle{font-size:13px;font-weight:600;margin-top:2px}.inv-top{display:flex;justify-content:space-between;margin-bottom:16px;line-height:1.8}.right{text-align:right}.inv-billto{margin-bottom:16px;line-height:1.8}.bt-label{font-weight:700;font-size:13px;margin-bottom:2px}.sec-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#555;margin:14px 0 6px}.inv-tbl{width:100%;border-collapse:collapse}.inv-tbl th{background:#111;color:#fff;font-size:10px;font-weight:600;text-transform:uppercase;padding:6px 8px;text-align:left}.inv-tbl th:not(:first-child),.inv-tbl td:not(:first-child){text-align:right}.inv-tbl td{padding:6px 8px;border-bottom:1px solid #eee}.inv-tbl tr:nth-child(even) td{background:#f8f8f6}.inv-tbl tfoot td{font-weight:600;border-top:2px solid #111;background:#f0f0ec;padding:7px 8px}.inv-note{font-size:11px;color:#777;margin-top:10px}</style></head><body>${content}</body></html>`);
+    w.document.close(); w.print();
   }
+
+  function resetForm() {
+    if (!confirm('Reset all fields to defaults?')) return;
+    items   = [{desc:'',qty:1,price:0,total:0}];
+    credits = [{desc:'',issued:0,used:0,remaining:0}];
+    document.getElementById('invNum').value        = '001';
+    document.getElementById('invDate').value       = new Date().toISOString().split('T')[0];
+    document.getElementById('plannedLeaves').value = 'Planned Leaves';
+    buildItemRows(); buildCreditRows(); updatePreview();
+  }
+
+  // Static fields — just update preview on input, no row rebuilding
+  ['invNum','invDate','fromName','fromAddr','fromPhone','fromEmail',
+   'toCompany','toRef','toACN','toAddr','toPhone','toEmail','toWeb','plannedLeaves']
+  .forEach(id => document.getElementById(id)?.addEventListener('input', updatePreview));
 
   // Init
   document.getElementById('invDate').value = new Date().toISOString().split('T')[0];
-  render();
+  buildItemRows();
+  buildCreditRows();
+  updatePreview();
 </script>
 </body>
 </html>
